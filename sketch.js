@@ -1,143 +1,48 @@
-//variáveis da bolinha
-let xBolinha = 100;
-let yBolinha = 200;
-let diametro = 20;
-let raio = diametro / 2;
+/*
+ * @name Follow 3
+ * @arialabel Long segmented snake shape follows the user’s mouse as it moves 
+ * @frame 710,400
+ * @description A segmented line follows the mouse. The relative angle from
+ * each segment to the next is calculated with atan2() and the position of
+ * the next is calculated with sin() and cos(). Based on code from Keith Peters.
+ */
+let x = [],
+  y = [],
+  segNum = 20,
+  segLength = 18;
 
-//variáveis do oponente
-let xRaqueteOponente = 585;
-let yRaqueteOponente = 150;
-
-//velocidade da bolinha
-let velocidadeXBolinha = 6;
-let velocidadeYBolinha = 6;
-
-//variáveis da raquete
-let xRaquete = 5;
-let yRaquete = 150;
-let raqueteComprimento = 10;
-let raqueteAltura = 90;
-
-//placar do jogo
-let meusPontos = 0;
-let pontosDoOponente = 0;
-
-//sons do jogo
-let raquetada;
-let ponto;
-let trilha;
-
-function preload(){
-  trilha = loadSound("trilha.mp3");
-  ponto = loadSound("ponto.mp3");
-  raquetada = loadSound("raquetada.mp3")
+for (let i = 0; i < segNum; i++) {
+  x[i] = 0;
+  y[i] = 0;
 }
 
-
-let colidiu = false;
-
 function setup() {
-  createCanvas(600, 400);
-  trilha.loop();
+  createCanvas(710, 400);
+  strokeWeight(9);
+  stroke(255, 100);
 }
 
 function draw() {
-    background(0);
-    mostraBolinha();
-    movimentaBolinha();
-    verificaColisaoBorda();
-    mostraRaquete(xRaquete, yRaquete);
-    movimentaMinhaRaquete();
-    verificaColisaoRaquete(xRaquete, yRaquete);
-    verificaColisaoRaquete(xRaqueteOponente, yRaqueteOponente);
-    mostraRaquete(xRaqueteOponente, yRaqueteOponente);
-    movimentaRaqueteOponente();
-    incluiPlacar()
-    marcaPonto();
-    bolinhaNaoFicaPresa();
-    
-}
-function mostraBolinha() {
-  circle(xBolinha, yBolinha, diametro);
-}
-
-function movimentaBolinha() {
-  xBolinha += velocidadeXBolinha;
-  yBolinha += velocidadeYBolinha;
-}
-
-function verificaColisaoBorda() {
-  if (xBolinha + raio > width || xBolinha - raio < 0) {
-    velocidadeXBolinha *= -1;
-  }
-  if (yBolinha + raio > height || yBolinha - raio < 0) {
-    velocidadeYBolinha *= -1;
+  background(0);
+  dragSegment(0, mouseX, mouseY);
+  for (let i = 0; i < x.length - 1; i++) {
+    dragSegment(i + 1, x[i], y[i]);
   }
 }
 
-function mostraRaquete(x,y) {
-    rect(x, y, raqueteComprimento, raqueteAltura);
+function dragSegment(i, xin, yin) {
+  const dx = xin - x[i];
+  const dy = yin - y[i];
+  const angle = atan2(dy, dx);
+  x[i] = xin - cos(angle) * segLength;
+  y[i] = yin - sin(angle) * segLength;
+  segment(x[i], y[i], angle);
 }
 
-function movimentaMinhaRaquete() {
-  if(keyIsDown(UP_ARROW)) {
-    yRaquete -= 10;
-  }
-  if(keyIsDown(DOWN_ARROW)) {
-    yRaquete += 10;
-  }
-}
-
-function verificaColisaoRaquete() {
-  if (xBolinha - raio < xRaquete + raqueteComprimento && yBolinha - raio < yRaquete + raqueteAltura && yBolinha + raio > yRaquete) {
-    velocidadeXBolinha *= -1;
-    raquetada.play();
-  }
-}
-
-function verificaColisaoRaquete(x, y) {
-    colidiu = collideRectCircle(x, y, raqueteComprimento, raqueteAltura, xBolinha, yBolinha, raio);
-    if (colidiu){
-        velocidadeXBolinha *= -1;
-      raquetada.play();
-  }
-}
-
-function movimentaRaqueteOponente() {
-     if(keyIsDown(87)) {
-    yRaqueteOponente -= 10;
-  }
-  if(keyIsDown(83)) {
-    yRaqueteOponente += 10;
-  }
-}
-
-
-function incluiPlacar(){
-  stroke(255)
-    textAlign(CENTER);
-    textSize(16);
-    fill(color(255,140, 0));
-    rect(150, 10, 40, 20);
-    fill(255);
-    text(meusPontos, 170, 26);
-    fill(color(255,140, 0));
-    rect(450, 10, 40, 20);
-    fill(255);
-    text(pontosDoOponente, 470, 26);
-
-
-
-}
-
-
-function marcaPonto() {
-  if (xBolinha > 590) {
-    meusPontos += 1;
-    ponto.play();
-  }
-  if (xBolinha < 10) {
-    pontosDoOponente += 1;
-    ponto.play();
-  }
+function segment(x, y, a) {
+  push();
+  translate(x, y);
+  rotate(a);
+  line(0, 0, segLength, 0);
+  pop();
 }
